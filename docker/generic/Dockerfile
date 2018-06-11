@@ -26,4 +26,5 @@ EXPOSE 8090
 # since documentation still refers to using docker without additional EXPOSE step
 EXPOSE 8080
 
-ENTRYPOINT ["/usr/sbin/start_esp"]
+#ENTRYPOINT ["/usr/sbin/start_esp"]
+ENTRYPOINT ["/bin/bash", "-c", "while true; do sleep 2000; date; done"]

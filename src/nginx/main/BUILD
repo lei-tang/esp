@@ -94,6 +94,9 @@ cc_binary(
     srcs = [
         "ngx_modules.c",
     ],
+    defines = [
+        "NGX_DEBUG",
+    ],
     linkstatic = 1,
     visibility = [
         "//visibility:public",

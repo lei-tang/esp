@@ -34,6 +34,11 @@
 #include "src/nginx/module.h"
 #include "src/nginx/util.h"
 
+#include <iostream>
+
+// Added just to view the code in clion
+#define NGX_HTTP_SSL 1
+
 extern "C" {
 #include "src/core/ngx_core.h"
 #include "src/http/ngx_http.h"
@@ -223,6 +228,9 @@ inline void append(ngx_buf_t *buf, const char (&value)[n]) {
 // request within it, passing it back to NGINX for network communication.
 ngx_int_t ngx_esp_upstream_create_request(ngx_http_request_t *r) {
   ngx_esp_http_connection *http_connection = get_esp_connection(r);
+
+  std::cout<<"My call to ngx_esp_upstream_create_request()"<<std::endl;
+
   ngx_log_debug2(
       NGX_LOG_DEBUG_HTTP, r->connection->log, 0,
       "esp: ngx_esp_upstream_create_request (r=%p, http_connection=%p)", r,
@@ -802,6 +810,8 @@ Status initialize_events_and_logs(ngx_esp_http_connection *http_connection) {
 // current request (stored in connection.data) must be created by this point.
 Status initialize_connection(ngx_pool_t *connection_pool,
                              ngx_esp_http_connection *http_connection) {
+  ngx_log_debug1(NGX_LOG_DEBUG_HTTP, &http_connection->log, 0, "Call %s", __FUNCTION__);
+
   // request must be initialized prior to this call!
   auto r = http_connection->request;
   if (r == nullptr) {
@@ -838,6 +848,7 @@ Status initialize_connection(ngx_pool_t *connection_pool,
 // Initializes the ngx_request_t used to perform the HTTP request.
 Status initialize_request(ngx_pool_t *request_pool,
                           ngx_esp_http_connection *http_connection) {
+  ngx_log_debug1(NGX_LOG_DEBUG_HTTP, &http_connection->log, 0, "Call %s", __FUNCTION__);
   // request must be initialized prior to this call!
   auto r = http_connection->request;
   if (r == nullptr) {
@@ -935,6 +946,10 @@ Status initialize_request(ngx_pool_t *request_pool,
 Status initialize_upstream_request(ngx_log_t *log, HTTPRequest *request,
                                    ngx_pool_t *request_pool,
                                    ngx_esp_http_connection *http_connection) {
+
+  ngx_log_debug1(NGX_LOG_DEBUG_HTTP, log, 0, "My call to %s", __FUNCTION__);
+  std::cout<<"My call to initialize_upstream_request()"<<std::endl;
+
   // request must be initialized prior to this call!
   auto r = http_connection->request;
   if (r == nullptr) {
@@ -993,6 +1008,7 @@ Status initialize_upstream_request(ngx_log_t *log, HTTPRequest *request,
   http_connection->upstream_conf.pass_headers =
       reinterpret_cast<ngx_array_t *>(NGX_CONF_UNSET_PTR);
 
+  std::cout<<"My upstream->ssl is "<<upstream->ssl<<std::endl;
 // Set up SSL if available and required.
 #if NGX_HTTP_SSL
   if (upstream->ssl) {
@@ -1002,7 +1018,15 @@ Status initialize_upstream_request(ngx_log_t *log, HTTPRequest *request,
         http_cctx->main_conf[ngx_esp_module.ctx_index]);
     http_connection->upstream_conf.ssl = mc->ssl;
     http_connection->upstream_conf.ssl_session_reuse = 1;
+//    ngx_log_debug1(NGX_LOG_DEBUG_HTTP, log, 0,
+//                 "esp: upstream ssl_name is %s", upstream->resolved->host);
+    std::cout<<"My upstream->resolved->host is "<<upstream->resolved->host.data<<std::endl;
+
+    // For support SNI (Server Name Indication)
+    http_connection->upstream_conf.ssl_server_name = 1;
+
     if (mc->cert_path.len > 0) {
+      std::cout<<"My mc->cert_path is "<<mc->cert_path.data<<std::endl;
       http_connection->upstream_conf.ssl_verify = 1;
     }
   }
@@ -1034,6 +1058,10 @@ Status initialize_upstream_request(ngx_log_t *log, HTTPRequest *request,
 Status ngx_esp_create_http_request(
     ngx_log_t *log, HTTPRequest *request,
     ngx_esp_http_connection **out_http_connection) {
+
+  ngx_log_debug1(NGX_LOG_DEBUG_HTTP, log, 0, "Call %s", __FUNCTION__);
+  std::cout<<"My call to ngx_esp_create_http_request()"<<std::endl;
+
   // Create the connection pool and request pools.
   std::unique_ptr<ngx_pool_t, ngx_pool_t_deleter> connection_pool;
   std::unique_ptr<ngx_pool_t, ngx_pool_t_deleter> request_pool;
@@ -1115,6 +1143,8 @@ Status ngx_esp_create_http_request(
 void ngx_esp_send_http_request(std::unique_ptr<HTTPRequest> request) {
   ngx_esp_http_connection *http_connection(nullptr);
 
+  std::cout<<"My call to ngx_esp_send_http_request()"<<std::endl;
+
   ngx_log_t *log = ngx_cycle->log;
 
   ngx_log_debug3(NGX_LOG_DEBUG_HTTP, log, 0,
@@ -1134,6 +1164,7 @@ void ngx_esp_send_http_request(std::unique_ptr<HTTPRequest> request) {
     // Store the caller's request for the continuation call.
     http_connection->esp_request = std::move(request);
 
+    std::cout<<"My call to ngx_http_upstream_init()"<<std::endl;
     // Initiate the upstream connection by calling NGINX upstream.
     ngx_http_upstream_init(http_connection->request);
   } else {

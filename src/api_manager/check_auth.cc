@@ -17,6 +17,7 @@
 
 #include <chrono>
 #include <string>
+#include <iostream>
 
 #include "include/api_manager/api_manager.h"
 #include "include/api_manager/request.h"
@@ -451,6 +452,7 @@ void AuthChecker::HttpFetch(
   }
 
   request->set_method("GET").set_url(url);
+  std::cout<<"AuthChecker::HttpFetch calls RunHTTPRequest()"<<std::endl;
   env_->RunHTTPRequest(std::move(request));
 }
 

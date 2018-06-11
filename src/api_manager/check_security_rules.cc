@@ -268,6 +268,8 @@ void AuthzChecker::HttpFetch(
     request->set_header(kContentType, kApplication).set_body(request_body);
   }
 
+  std::cout<<"AuthzChecker::HttpFetch calls RunHTTPRequest()"<<std::endl;
+  std::cout<<"AuthzChecker::HttpFetch token type is "<<token_type<<std::endl;
   env_->RunHTTPRequest(std::move(request));
 }
 

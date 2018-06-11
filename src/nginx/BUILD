@@ -106,6 +106,7 @@ cc_library(
     ],
     defines = [
         "NGX_HTTP_ENDPOINTS_RUNTIME",
+        "NGX_DEBUG",
     ],
     visibility = [":__subpackages__"],
     deps = [

@@ -34,6 +34,12 @@ git_repository(
     remote = "https://nginx.googlesource.com/nginx",
 )
 
+#local_repository(
+#    name = "nginx",
+#    path = "/usr/local/google/home/leitang/git/esp/bazel-esp/external/nginx",
+#)
+
+
 load("@nginx//:build.bzl", "nginx_repositories")
 
 nginx_repositories(
@@ -117,10 +123,15 @@ bind(
     actual = "@gflags_git//:gflags",
 )
 
-git_repository(
+#git_repository(
+#    name = "tools",
+#    commit = ESP_TOOL,
+#    remote = "https://github.com/cloudendpoints/endpoints-tools",
+#)
+
+local_repository(
     name = "tools",
-    commit = ESP_TOOL,
-    remote = "https://github.com/cloudendpoints/endpoints-tools",
+    path = "/usr/local/google/home/leitang/git/endpoints-tools",
 )
 
 #
